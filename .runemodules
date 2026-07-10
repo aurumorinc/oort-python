@@ -1,0 +1,12 @@
+[runemodule ".agents/skills/koda/modules/koda"]
+	url = https://github.com/aurumorinc/koda/tree/main
+	path = .agents/skills/koda/modules/koda
+[runemodule ".agents/skills/sift/modules/sift"]
+	url = https://github.com/aurumorinc/sif/tree/main
+	path = .agents/skills/sift/modules/sift
+[runemodule ".agents/skills/worldline-python/modules/worldline-python"]
+	url = https://github.com/aurumorinc/worldline-python/tree/main
+	path = .agents/skills/worldline-python/modules/worldline-python
+[runemodule ".agents/skills/mox/modules/mox"]
+	url = https://github.com/capybaarainc/mox/tree/main
+	path = .agents/skills/mox/modules/mox
