@@ -216,3 +216,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Agents
+plans/
+
+# Rune
+.aider*
+.rune/*
+!.rune/config
+!.rune/index
+.agents/skills/koda/modules/koda
+.agents/skills/sift/modules/sift
+.agents/skills/worldline-python/modules/worldline-python
+.agents/skills/snapp/modules/snapp
+.agents/skills/mox/modules/mox
