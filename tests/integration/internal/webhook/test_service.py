@@ -35,8 +35,8 @@ async def test_webhook_integration_async(webhook):
     body1 = json.loads(req1.content)
     body2 = json.loads(req2.content)
 
-    assert body1["event"] == "test.STARTED"
-    assert body2["event"] == "test.COMPLETED"
+    assert body1["type"] == "test.started"
+    assert body2["type"] == "test.completed"
     assert body2["data"] == {"data": "async_hello"}
 
 
@@ -64,6 +64,6 @@ def test_webhook_integration_sync(webhook):
     body1 = json.loads(req1.content)
     body2 = json.loads(req2.content)
 
-    assert body1["event"] == "test.STARTED"
-    assert body2["event"] == "test.COMPLETED"
+    assert body1["type"] == "test.started"
+    assert body2["type"] == "test.completed"
     assert body2["data"] == {"data": "sync_hello"}
