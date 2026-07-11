@@ -4,7 +4,6 @@ from moto import mock_aws
 
 from oort.file.schema import S3Config
 from oort.file.main import File
-from oort.config import setup, OortSettings
 
 
 @pytest.fixture(autouse=True)
@@ -19,7 +18,10 @@ def setup_moto():
             secret_key="fake-secret",
             region="us-east-1",
         )
-        setup(OortSettings(oort_s3=s3_config))
+        # Mock settings for integration test
+        from oort.config import settings
+
+        settings.s3 = s3_config
         yield
 
 
@@ -46,7 +48,7 @@ async def test_file_integration_async():
     url = await f.get_presigned_url_async()
 
     assert url is not None
-    assert "test-bucket" in url
+    assert "https://s3.amazonaws.com/test-bucket/" in url or "test-bucket" in url
 
     # We can verify it's in moto
     client = boto3.client("s3", region_name="us-east-1")
