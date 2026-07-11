@@ -1119,28 +1119,12 @@ packages\koda\src\koda\utils\file\main.py:
 │    """
 │    def __init__(self, path: str, filename: str, mimetype: str, url: Optional[str] = None):
 ⋮
-│    def __enter__(self) -> "File":
-⋮
-│    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-⋮
 │    def cleanup(self) -> None:
-⋮
-│    @property
-│    def bytes(self) -> bytes:
-⋮
-│    @property
-│    def base64(self) -> str:
-⋮
-│    @property
-│    def presigned_url(self) -> Optional[str]:
 ⋮
 │    def to_playwright_input(self) -> dict:
 ⋮
 │    @classmethod
 │    def _get_temp_path(cls, filename: str) -> str:
-⋮
-│    @classmethod
-│    def create_empty(cls, filename: str, mimetype: Optional[str] = None, touch: bool = False) -> "F
 ⋮
 │    @classmethod
 │    def from_bytes(cls, data: bytes, filename: str, mimetype: Optional[str] = None) -> "File":
