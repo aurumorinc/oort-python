@@ -1,4 +1,4 @@
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from oort.config import (OortSettings, settings,)
 from oort.exceptions import (Error, S3ConfigurationError,
