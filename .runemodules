@@ -2,7 +2,7 @@
 	url = https://github.com/aurumorinc/koda/tree/main
 	path = .agents/skills/koda/modules/koda
 [runemodule ".agents/skills/sift/modules/sift"]
-	url = https://github.com/aurumorinc/sif/tree/main
+	url = https://github.com/aurumorinc/sift/tree/main
 	path = .agents/skills/sift/modules/sift
 [runemodule ".agents/skills/worldline-python/modules/worldline-python"]
 	url = https://github.com/aurumorinc/worldline-python/tree/main
