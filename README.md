@@ -18,20 +18,27 @@ pdm add oort-python
 
 ## Configuration
 
-`oort` settings are designed to be easily composed within your application.
+`oort` provides a unified configuration object that automatically inherits from `worldline-python`'s `WorldlineSettings` and `pydantic-settings`'s `BaseSettings`. It loads configuration directly from your environment variables.
 
 ```python
-from worldline.config import WorldlineSettings
-from oort.config import OortSettings, setup
-from pydantic_settings import BaseSettings
+from oort import settings
 
-class AppSettings(WorldlineSettings, OortSettings, BaseSettings):
-    pass
+# Access your S3 configuration
+print(settings.s3.bucket)
 
-settings = AppSettings()
+# Access underlying Worldline settings
+print(settings.log_level)
+```
 
-# You MUST call setup() to activate the configuration for oort globally
-setup(settings)
+If your application needs to add its own settings, you can easily extend `OortSettings`:
+
+```python
+from oort import OortSettings
+
+class AppSettings(OortSettings):
+    my_app_custom_setting: str = "default_value"
+
+app_settings = AppSettings()
 ```
 
 ## Usage
@@ -74,8 +81,8 @@ You can use the native async functions directly for ultimate control:
 ```python
 from oort import upload, generate_presigned_url
 
-await upload(b"my data", "object_key.txt", "text/plain", config=settings.oort_s3)
-url = await generate_presigned_url("object_key.txt", config=settings.oort_s3)
+await upload(b"my data", "object_key.txt", "text/plain", config=settings.s3)
+url = await generate_presigned_url("object_key.txt", config=settings.s3)
 ```
 
 ## Development
