@@ -1,48 +1,47 @@
+# src/oort/webhook/schema.py
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class WebhookEvent(str, Enum):
-    """Lifecycle events for webhook callbacks."""
-
-    STARTED = "STARTED"
-    COMPLETED = "COMPLETED"
-    FAILED = "FAILED"
+    STARTED = "started"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class WebhookRequest(BaseModel):
     """A webhook configuration for receiving asynchronous task updates."""
 
-    url: str = Field(..., description="The URL to send the webhook payload to.")
-    method: str = Field(
-        "POST", description="The HTTP method to use (defaults to POST)."
+    url: HttpUrl = Field(
+        description="The destination URL where event payloads will be sent via POST request."
     )
     headers: Optional[Dict[str, str]] = Field(
-        default=None, description="Optional headers to include in the webhook request."
+        default=None,
+        description="Key-value pairs to be included as HTTP headers (e.g., for authentication or custom identifiers).",
     )
     metadata: Optional[Dict[str, Any]] = Field(
-        default=None, description="Optional metadata to include in the payload."
+        default=None,
+        description="User-defined key-value data that will be echoed back in every webhook payload.",
     )
     events: Optional[List[WebhookEvent]] = Field(
-        default=None,
-        description="Optional list of events to subscribe to. If not provided, defaults to all.",
+        default=[
+            WebhookEvent.STARTED,
+            WebhookEvent.COMPLETED,
+            WebhookEvent.FAILED,
+        ],
+        description="A filter list of specific event types to receive. If omitted, all supported events are sent.",
     )
 
 
 class WebhookResponse(BaseModel):
-    """Standardized response payload sent to the webhook URL."""
-
-    event: str = Field(
-        ...,
-        description="The event that triggered the webhook (e.g., STARTED, COMPLETED, FAILED).",
-    )
-    task_id: str = Field(..., description="A unique identifier for the task.")
-    metadata: Optional[Dict[str, Any]] = Field(
-        None, description="Custom metadata provided in the request."
-    )
-    data: Optional[Any] = Field(None, description="The result data (if successful).")
-    error: Optional[str] = Field(None, description="Error message (if failed).")
+    success: bool
+    type: str  # e.g., "agent.started", "response.completed"
+    id: str  # Windmill Job ID (WM_JOB_ID) or generated UUID
+    webhookId: str  # Unique UUID for the delivery
+    data: Any  # Empty array [] for started, or the raw output array for completed
+    error: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 __all__ = ["WebhookEvent", "WebhookRequest", "WebhookResponse"]

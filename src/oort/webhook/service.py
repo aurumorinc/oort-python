@@ -14,6 +14,25 @@ from oort.webhook.schema import WebhookRequest, WebhookEvent, WebhookResponse
 logger = logging.getLogger(__name__)
 
 
+def _serialize_files(obj: Any) -> Any:
+    """Recursively converts File objects into dicts for JSON serialization."""
+    if isinstance(obj, list):
+        return [_serialize_files(i) for i in obj]
+    if isinstance(obj, dict):
+        return {k: _serialize_files(v) for k, v in obj.items()}
+    if (
+        hasattr(obj, "presigned_url")
+        and hasattr(obj, "mimetype")
+        and hasattr(obj, "filename")
+    ):
+        return {
+            "filename": obj.filename,
+            "mimetype": obj.mimetype,
+            "url": obj.presigned_url,
+        }
+    return obj
+
+
 async def dispatch_webhook(
     webhook: Optional[WebhookRequest], payload: WebhookResponse
 ) -> None:
@@ -26,15 +45,15 @@ async def dispatch_webhook(
     try:
         async with httpx.AsyncClient() as client:
             response = await client.request(
-                method=webhook.method,
-                url=webhook.url,
+                method="POST",
+                url=str(webhook.url),
                 json=payload.model_dump(exclude_none=True),
                 headers=headers,
                 timeout=10.0,
             )
             response.raise_for_status()
     except Exception as e:
-        logger.warning("Failed to trigger webhook for event %s: %s", payload.event, e)
+        logger.warning("Failed to trigger webhook for event %s: %s", payload.type, e)
 
 
 def _sync_dispatch(webhook: Optional[WebhookRequest], payload: WebhookResponse) -> None:
@@ -85,13 +104,18 @@ def webhook_dispatch(
                 if webhook and (
                     not webhook.events or WebhookEvent.STARTED in webhook.events
                 ):
-                    payload = WebhookResponse(
-                        event=f"{event_prefix}.{WebhookEvent.STARTED.value}"
+                    type_str = (
+                        f"{event_prefix}.{WebhookEvent.STARTED.value}"
                         if event_prefix
-                        else WebhookEvent.STARTED.value,
-                        task_id=task_id,
+                        else WebhookEvent.STARTED.value
+                    )
+                    payload = WebhookResponse(
+                        success=True,
+                        type=type_str,
+                        id=task_id,
+                        webhookId=uuid.uuid4().hex,
+                        data=[],
                         metadata=webhook.metadata,
-                        data=None,
                         error=None,
                     )
                     await dispatch_webhook(webhook=webhook, payload=payload)
@@ -102,13 +126,18 @@ def webhook_dispatch(
                     if webhook and (
                         not webhook.events or WebhookEvent.FAILED in webhook.events
                     ):
-                        payload = WebhookResponse(
-                            event=f"{event_prefix}.{WebhookEvent.FAILED.value}"
+                        type_str = (
+                            f"{event_prefix}.{WebhookEvent.FAILED.value}"
                             if event_prefix
-                            else WebhookEvent.FAILED.value,
-                            task_id=task_id,
+                            else WebhookEvent.FAILED.value
+                        )
+                        payload = WebhookResponse(
+                            success=False,
+                            type=type_str,
+                            id=task_id,
+                            webhookId=uuid.uuid4().hex,
+                            data=[],
                             metadata=webhook.metadata,
-                            data=None,
                             error=str(e),
                         )
                         await dispatch_webhook(webhook=webhook, payload=payload)
@@ -130,13 +159,16 @@ def webhook_dispatch(
                     else:
                         data = response
 
+                    type_str = (
+                        f"{event_prefix}.{event.value}" if event_prefix else event.value
+                    )
                     payload = WebhookResponse(
-                        event=f"{event_prefix}.{event.value}"
-                        if event_prefix
-                        else event.value,
-                        task_id=task_id,
+                        success=success,
+                        type=type_str,
+                        id=task_id,
+                        webhookId=uuid.uuid4().hex,
+                        data=_serialize_files(data) if data is not None else [],
                         metadata=webhook.metadata,
-                        data=data,
                         error=getattr(response, "error", None) if not success else None,
                     )
                     await dispatch_webhook(webhook=webhook, payload=payload)
@@ -165,13 +197,18 @@ def webhook_dispatch(
                 if webhook and (
                     not webhook.events or WebhookEvent.STARTED in webhook.events
                 ):
-                    payload = WebhookResponse(
-                        event=f"{event_prefix}.{WebhookEvent.STARTED.value}"
+                    type_str = (
+                        f"{event_prefix}.{WebhookEvent.STARTED.value}"
                         if event_prefix
-                        else WebhookEvent.STARTED.value,
-                        task_id=task_id,
+                        else WebhookEvent.STARTED.value
+                    )
+                    payload = WebhookResponse(
+                        success=True,
+                        type=type_str,
+                        id=task_id,
+                        webhookId=uuid.uuid4().hex,
+                        data=[],
                         metadata=webhook.metadata,
-                        data=None,
                         error=None,
                     )
                     _sync_dispatch(webhook=webhook, payload=payload)
@@ -182,13 +219,18 @@ def webhook_dispatch(
                     if webhook and (
                         not webhook.events or WebhookEvent.FAILED in webhook.events
                     ):
-                        payload = WebhookResponse(
-                            event=f"{event_prefix}.{WebhookEvent.FAILED.value}"
+                        type_str = (
+                            f"{event_prefix}.{WebhookEvent.FAILED.value}"
                             if event_prefix
-                            else WebhookEvent.FAILED.value,
-                            task_id=task_id,
+                            else WebhookEvent.FAILED.value
+                        )
+                        payload = WebhookResponse(
+                            success=False,
+                            type=type_str,
+                            id=task_id,
+                            webhookId=uuid.uuid4().hex,
+                            data=[],
                             metadata=webhook.metadata,
-                            data=None,
                             error=str(e),
                         )
                         _sync_dispatch(webhook=webhook, payload=payload)
@@ -210,13 +252,16 @@ def webhook_dispatch(
                     else:
                         data = response
 
+                    type_str = (
+                        f"{event_prefix}.{event.value}" if event_prefix else event.value
+                    )
                     payload = WebhookResponse(
-                        event=f"{event_prefix}.{event.value}"
-                        if event_prefix
-                        else event.value,
-                        task_id=task_id,
+                        success=success,
+                        type=type_str,
+                        id=task_id,
+                        webhookId=uuid.uuid4().hex,
+                        data=_serialize_files(data) if data is not None else [],
                         metadata=webhook.metadata,
-                        data=data,
                         error=getattr(response, "error", None) if not success else None,
                     )
                     _sync_dispatch(webhook=webhook, payload=payload)
