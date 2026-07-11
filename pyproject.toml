@@ -6,7 +6,7 @@ authors = [
     {name = "Aryan Singh",email = "aquiveal@gmail.com"},
 ]
 dependencies = ["boto3>=1.43.46", "pydantic>=2.13.4", "httpx>=0.28.1", "asgiref>=3.11.1", "worldline @ git+https://github.com/aurumorinc/worldline-python.git", "pydantic-settings>=2.14.2"]
-requires-python = "==3.13.*"
+requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "MIT"}
 
