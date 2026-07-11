@@ -1743,4 +1743,280 @@ references\sift\utils\webhook\service.py:
 │                webhook = WebhookRequest(**webhook_data)
 ⋮
 
+src\oort\__init__.py
+
+src\oort\config.py:
+⋮
+│class OortSettings(BaseModel):
+⋮
+│def setup(config: OortSettings) -> None:
+⋮
+│def get_config() -> OortSettings:
+⋮
+
+src\oort\exceptions.py:
+⋮
+│class Error(Exception):
+⋮
+│class S3ConfigurationError(Error):
+⋮
+│class WebhookDispatchError(Error):
+⋮
+
+src\oort\file\__init__.py
+
+src\oort\file\main.py:
+⋮
+│class File:
+│    """
+│    A wrapper around a local temporary file, with a mandatory filename and mimetype.
+│    Supports lazy uploading to S3 to generate a presigned URL.
+⋮
+│    def __init__(
+│        self, path: str, filename: str, mimetype: str, url: Optional[str] = None
+⋮
+│    def __enter__(self) -> "File":
+⋮
+│    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+⋮
+│    def cleanup(self) -> None:
+⋮
+│    @property
+│    def bytes(self) -> bytes:
+⋮
+│    @property
+│    def base64(self) -> str:
+⋮
+│    @property
+│    def presigned_url(self) -> Optional[str]:
+⋮
+│    async def get_presigned_url_async(self) -> Optional[str]:
+⋮
+│    def to_playwright_input(self) -> dict[str, Any]:
+⋮
+│    @classmethod
+│    def _get_temp_path(cls, filename: str) -> str:
+⋮
+│    @classmethod
+│    def create_empty(
+│        cls, filename: str, mimetype: Optional[str] = None, touch: bool = False
+⋮
+│    @classmethod
+│    def from_bytes(
+│        cls,
+│        data: Union[builtins.bytes, str],
+│        filename: str,
+│        mimetype: Optional[str] = None,
+⋮
+│    @classmethod
+│    def from_base64(
+│        cls,
+│        base64_string: Union[str, builtins.bytes],
+│        filename: str,
+│        mimetype: Optional[str] = None,
+⋮
+│    @classmethod
+│    def from_url(
+│        cls, url: str, filename: Optional[str] = None, mimetype: Optional[str] = None
+⋮
+│    @classmethod
+│    def from_path(cls, source_path: str, filename: Optional[str] = None) -> "File":
+⋮
+│    @classmethod
+│    async def from_playwright_download(
+│        cls, download: Any, filename: Optional[str] = None
+⋮
+
+src\oort\file\schema.py:
+⋮
+│class S3Config(BaseModel):
+⋮
+
+src\oort\file\service.py:
+⋮
+│def _get_client(config: S3Config) -> Any:
+⋮
+│def _upload_sync(
+│    data: Union[bytes, str], object_name: str, mimetype: str, config: S3Config
+⋮
+│def _generate_presigned_url_sync(
+│    object_name: str, config: S3Config, expires_in: Optional[int] = None
+⋮
+│async def upload(
+│    data: Union[bytes, str], object_name: str, mimetype: str, config: S3Config
+⋮
+│async def generate_presigned_url(
+│    object_name: str, config: S3Config, expires_in: Optional[int] = None
+⋮
+
+src\oort\webhook\__init__.py
+
+src\oort\webhook\schema.py:
+⋮
+│class WebhookEvent(str, Enum):
+⋮
+│class WebhookRequest(BaseModel):
+⋮
+│class WebhookResponse(BaseModel):
+⋮
+
+src\oort\webhook\service.py:
+⋮
+│async def dispatch_webhook(
+│    webhook: Optional[WebhookRequest], payload: WebhookResponse
+⋮
+│def _sync_dispatch(webhook: Optional[WebhookRequest], payload: WebhookResponse) -> None:
+│    """Helper to run dispatch_webhook synchronously in a thread (or event loop)."""
+⋮
+│    if loop and loop.is_running():
+⋮
+│        def run_in_thread():
+⋮
+│def webhook_dispatch(
+│    event_prefix: str = "",
+│) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+│    """Decorator to handle webhook lifecycle events (STARTED, COMPLETED, FAILED)."""
+│
+│    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+│        is_async = inspect.iscoroutinefunction(func)
+│
+│        if is_async:
+│
+│            @functools.wraps(func)
+│            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+│                sig = inspect.signature(func)
+│                bound_args = sig.bind(*args, **kwargs)
+│                bound_args.apply_defaults()
+│
+│                webhook_data = bound_args.arguments.get("webhook")
+│                webhook = None
+│                if isinstance(webhook_data, dict):
+│                    webhook = WebhookRequest(**webhook_data)
+⋮
+│        else:
+│
+│            @functools.wraps(func)
+│            def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
+│                sig = inspect.signature(func)
+│                bound_args = sig.bind(*args, **kwargs)
+│                bound_args.apply_defaults()
+│
+│                webhook_data = bound_args.arguments.get("webhook")
+│                webhook = None
+│                if isinstance(webhook_data, dict):
+│                    webhook = WebhookRequest(**webhook_data)
+⋮
+
+tests\__init__.py
+
+tests\conftest.py:
+⋮
+│@pytest.fixture(autouse=True)
+│def setup_oort_config():
+⋮
+
+tests\integration\__init__.py
+
+tests\integration\internal\__init__.py
+
+tests\integration\internal\file\__init__.py
+
+tests\integration\internal\file\test_service.py:
+⋮
+│@pytest.fixture(autouse=True)
+│def setup_moto():
+⋮
+│def test_file_integration_sync():
+⋮
+│@pytest.mark.asyncio
+│async def test_file_integration_async():
+⋮
+
+tests\integration\internal\webhook\__init__.py
+
+tests\integration\internal\webhook\test_service.py:
+⋮
+│@pytest.fixture
+│def webhook():
+⋮
+│@respx.mock
+│@pytest.mark.asyncio
+│async def test_webhook_integration_async(webhook):
+│    request_mock = respx.post("https://example.com/webhook").mock(
+│        return_value=httpx.Response(200)
+⋮
+│    @webhook_dispatch(event_prefix="test")
+│    async def process_data(data: str, webhook: WebhookRequest = None):
+⋮
+│@respx.mock
+│def test_webhook_integration_sync(webhook):
+│    request_mock = respx.post("https://example.com/webhook").mock(
+│        return_value=httpx.Response(200)
+⋮
+│    @webhook_dispatch(event_prefix="test")
+│    def process_data_sync(data: str, webhook: WebhookRequest = None):
+⋮
+
+tests\unit\__init__.py
+
+tests\unit\file\__init__.py
+
+tests\unit\file\test_main.py:
+⋮
+│def test_file_create_empty():
+⋮
+│def test_file_from_bytes():
+⋮
+│@patch("oort.file.main.upload")
+│@patch("oort.file.main.generate_presigned_url")
+│def test_file_presigned_url_sync(mock_gen, mock_upload):
+⋮
+│@patch("oort.file.main.upload")
+⋮
+│async def test_file_presigned_url_async(mock_gen, mock_upload):
+⋮
+
+tests\unit\file\test_service.py:
+⋮
+│@pytest.fixture
+│def s3_config():
+⋮
+│@patch("oort.file.service._s3_client", None)
+⋮
+│async def test_upload_bytes(mock_session_cls, s3_config):
+⋮
+│@patch("oort.file.service._s3_client", None)
+⋮
+│async def test_upload_file_path(mock_session_cls, s3_config):
+⋮
+│@patch("oort.file.service._s3_client", None)
+⋮
+│async def test_generate_presigned_url(mock_session_cls, s3_config):
+⋮
+
+tests\unit\webhook\__init__.py
+
+tests\unit\webhook\test_service.py:
+⋮
+│@pytest.fixture
+│def webhook():
+⋮
+│class MockResponseModel(BaseModel):
+⋮
+│@patch("oort.webhook.service.httpx.AsyncClient", spec=True)
+│@pytest.mark.asyncio
+│async def test_dispatch_webhook(mock_client_cls, webhook):
+⋮
+│@patch("oort.webhook.service.dispatch_webhook")
+│@pytest.mark.asyncio
+│async def test_webhook_dispatch_async(mock_dispatch, webhook):
+│    @webhook_dispatch(event_prefix="test")
+│    async def dummy_async_func(data: str, webhook: WebhookRequest = None):
+⋮
+│@patch("oort.webhook.service._sync_dispatch")
+│def test_webhook_dispatch_sync(mock_dispatch, webhook):
+│    @webhook_dispatch(event_prefix="test")
+│    def dummy_sync_func(data: str, webhook: WebhookRequest = None):
+⋮
+
 ```
