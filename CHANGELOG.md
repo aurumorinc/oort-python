@@ -1,7 +1,8 @@
-# Changelog v0.4.1
+# Changelog v0.5.0
 
-## Infrastructure
+## Improvements
 
-* **Relaxed Python version constraints**
-  Updated the package metadata to support Python versions >=3.11, moving away from the strict requirement of exactly 3.13 to improve compatibility across diverse development environments.
-  Commits: [565d083](https://github.com/aurumorinc/oort-python/commit/565d0838), [893281b](https://github.com/aurumorinc/oort-python/commit/893281b4)
+### Configuration Management
+* **Flattened S3 configuration in OortSettings**
+  The S3 configuration structure within `OortSettings` has been flattened into top-level fields to simplify configuration management. Backward compatibility is maintained via a computed `s3` property, ensuring existing integrations will continue to function without immediate modification.
+  Commits: [f399daf](https://github.com/aurumorinc/oort-python/commit/f399dafd), [746e113](https://github.com/aurumorinc/oort-python/commit/746e1132), [1f47a91](https://github.com/aurumorinc/oort-python/commit/1f47a912)
