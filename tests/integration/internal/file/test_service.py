@@ -21,7 +21,10 @@ def setup_moto():
         # Mock settings for integration test
         from oort.config import settings
 
-        settings.s3 = s3_config
+        settings.s3_bucket = "test-bucket"
+        settings.s3_access_key = "fake-key"
+        settings.s3_secret_key = "fake-secret"
+        settings.s3_region = "us-east-1"
         yield
 
 
