@@ -1,15 +1,9 @@
 import pytest
 from oort.config import settings
-from oort.file.schema import S3Config
-
-
 @pytest.fixture(autouse=True)
 def setup_oort_config():
-    s3_config = S3Config(
-        bucket="test-bucket",
-        access_key="test-key",
-        secret_key="test-secret",
-        region="us-east-1",
-    )
-    settings.s3 = s3_config
+    settings.s3_bucket = "test-bucket"
+    settings.s3_access_key = "test-key"
+    settings.s3_secret_key = "test-secret"
+    settings.s3_region = "us-east-1"
     yield settings
