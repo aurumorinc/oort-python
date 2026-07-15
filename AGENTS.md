@@ -1431,6 +1431,8 @@ def notify_user(user_id, sender: Any):
 
 .agents\skills\sift\SKILL.md
 
+.agents\skills\worldline-python\SKILL.md
+
 .github\pull_request_template.md
 
 .github\workflows\release.yaml
@@ -1442,6 +1444,8 @@ def notify_user(user_id, sender: Any):
 .runemodules
 
 AGENTS.md
+
+CHANGELOG.md
 
 LICENSE
 
@@ -1747,11 +1751,14 @@ src\oort\__init__.py
 
 src\oort\config.py:
 ⋮
-│class OortSettings(BaseModel):
+│class OortSettings(WorldlineSettings, BaseSettings):
+│    """
+│    Configuration for the oort package.
+│    Inherits from worldline.config.WorldlineSettings and pydantic_settings.BaseSettings
+│    as per the architectural blueprint.
 ⋮
-│def setup(config: OortSettings) -> None:
-⋮
-│def get_config() -> OortSettings:
+│    @property
+│    def s3(self) -> Optional[S3Config]:
 ⋮
 
 src\oort\exceptions.py:
@@ -1862,6 +1869,10 @@ src\oort\webhook\schema.py:
 
 src\oort\webhook\service.py:
 ⋮
+│def _serialize_files(obj: Any) -> Any:
+⋮
+│async def _serialize_files_async(obj: Any) -> Any:
+⋮
 │async def dispatch_webhook(
 │    webhook: Optional[WebhookRequest], payload: WebhookResponse
 ⋮
@@ -1945,6 +1956,15 @@ tests\integration\internal\webhook\test_service.py:
 │    request_mock = respx.post("https://example.com/webhook").mock(
 │        return_value=httpx.Response(200)
 ⋮
+│    class AsyncDummyFile:
+│        def __init__(
+│            self,
+│            filename="test.png",
+│            mimetype="image/png",
+│            presigned_url="https://s3/test.png",
+⋮
+│        async def get_presigned_url_async(self):
+⋮
 │    @webhook_dispatch(event_prefix="test")
 │    async def process_data(data: str, webhook: WebhookRequest = None):
 ⋮
@@ -1994,6 +2014,19 @@ tests\unit\file\test_service.py:
 │async def test_generate_presigned_url(mock_session_cls, s3_config):
 ⋮
 
+tests\unit\test_config.py:
+⋮
+│def test_oort_settings_s3_property_valid():
+⋮
+│def test_oort_settings_s3_property_missing_bucket():
+⋮
+│def test_oort_settings_s3_property_missing_access_key():
+⋮
+│def test_oort_settings_s3_property_missing_secret_key():
+⋮
+│def test_oort_settings_s3_property_all_missing():
+⋮
+
 tests\unit\webhook\__init__.py
 
 tests\unit\webhook\test_service.py:
@@ -2017,6 +2050,45 @@ tests\unit\webhook\test_service.py:
 │def test_webhook_dispatch_sync(mock_dispatch, webhook):
 │    @webhook_dispatch(event_prefix="test")
 │    def dummy_sync_func(data: str, webhook: WebhookRequest = None):
+⋮
+│def test_serialize_files():
+│    class DummyFile:
+│        def __init__(self, filename, mimetype, presigned_url):
+│            self.filename = filename
+│            self.mimetype = mimetype
+⋮
+│class AsyncDummyFile:
+│    def __init__(
+│        self,
+│        filename="test.png",
+│        mimetype="image/png",
+│        presigned_url="https://s3/test.png",
+│        delay=0.0,
+⋮
+│    async def get_presigned_url_async(self):
+⋮
+│@pytest.mark.asyncio
+│async def test_serialize_files_async_single():
+⋮
+│@pytest.mark.asyncio
+│async def test_serialize_files_async_list():
+⋮
+│@pytest.mark.asyncio
+│async def test_serialize_files_async_dict():
+⋮
+│@pytest.mark.asyncio
+│async def test_serialize_files_async_mixed_and_nested():
+⋮
+│@pytest.mark.asyncio
+│async def test_serialize_files_async_missing_attributes():
+│    class IncompleteFile:
+│        async def get_presigned_url_async(self):
+⋮
+│@pytest.mark.asyncio
+│async def test_serialize_files_async_upload_failure():
+⋮
+│@pytest.mark.asyncio
+│async def test_serialize_files_async_concurrency_timing():
 ⋮
 
 ```
