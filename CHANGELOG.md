@@ -1,8 +1,17 @@
-# Changelog v0.5.0
+# Changelog v0.6.0
+
+## Features
+
+* **Async File Serialization for Webhooks**
+  Implemented `_serialize_files_async` to handle webhook payloads, enabling recursive processing of file objects and asynchronous generation of presigned URLs.
+  Commits: [2eaaaa5](https://github.com/aurumorinc/oort-python/commit/2eaaaa58), [133b8df](https://github.com/aurumorinc/oort-python/commit/133b8df2), [b157094](https://github.com/aurumorinc/oort-python/commit/b157094d)
+
+* **Worldline Configuration Support**
+  Integrated `WorldlineSettings` into the `OortSettings` class, allowing for the new configuration structures required for Worldline integration.
+  Commits: [2eaaaa5](https://github.com/aurumorinc/oort-python/commit/2eaaaa58), [133b8df](https://github.com/aurumorinc/oort-python/commit/133b8df2), [b157094](https://github.com/aurumorinc/oort-python/commit/b157094d)
 
 ## Improvements
 
-### Configuration Management
-* **Flattened S3 configuration in OortSettings**
-  The S3 configuration structure within `OortSettings` has been flattened into top-level fields to simplify configuration management. Backward compatibility is maintained via a computed `s3` property, ensuring existing integrations will continue to function without immediate modification.
-  Commits: [f399daf](https://github.com/aurumorinc/oort-python/commit/f399dafd), [746e113](https://github.com/aurumorinc/oort-python/commit/746e1132), [1f47a91](https://github.com/aurumorinc/oort-python/commit/1f47a912)
+* **Expanded Test Coverage**
+  Added comprehensive unit tests covering the new configuration and serialization logic to ensure stability.
+  Commits: [2eaaaa5](https://github.com/aurumorinc/oort-python/commit/2eaaaa58), [133b8df](https://github.com/aurumorinc/oort-python/commit/133b8df2), [b157094](https://github.com/aurumorinc/oort-python/commit/b157094d)
