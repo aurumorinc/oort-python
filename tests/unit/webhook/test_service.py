@@ -1,7 +1,14 @@
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
+import asyncio
+import time
 from pydantic import BaseModel
-from oort.webhook.service import dispatch_webhook, webhook_dispatch, _serialize_files
+from oort.webhook.service import (
+    dispatch_webhook,
+    webhook_dispatch,
+    _serialize_files,
+    _serialize_files_async,
+)
 from oort.webhook.schema import WebhookRequest, WebhookResponse, WebhookEvent
 
 
@@ -124,3 +131,118 @@ def test_serialize_files():
         },
         "other": "value",
     }
+
+
+class AsyncDummyFile:
+    def __init__(
+        self,
+        filename="test.png",
+        mimetype="image/png",
+        presigned_url="https://s3/test.png",
+        delay=0.0,
+    ):
+        self.filename = filename
+        self.mimetype = mimetype
+        self._presigned_url = presigned_url
+        self.delay = delay
+
+    async def get_presigned_url_async(self):
+        if self.delay > 0:
+            await asyncio.sleep(self.delay)
+        if isinstance(self._presigned_url, Exception):
+            raise self._presigned_url
+        return self._presigned_url
+
+
+@pytest.mark.asyncio
+async def test_serialize_files_async_single():
+    f = AsyncDummyFile()
+    res = await _serialize_files_async(f)
+    assert res == {
+        "filename": "test.png",
+        "mimetype": "image/png",
+        "url": "https://s3/test.png",
+    }
+
+
+@pytest.mark.asyncio
+async def test_serialize_files_async_list():
+    f = AsyncDummyFile()
+    res = await _serialize_files_async([f, f])
+    expected = {
+        "filename": "test.png",
+        "mimetype": "image/png",
+        "url": "https://s3/test.png",
+    }
+    assert res == [expected, expected]
+
+
+@pytest.mark.asyncio
+async def test_serialize_files_async_dict():
+    f = AsyncDummyFile()
+    res = await _serialize_files_async({"file": f, "other": "value"})
+    assert res == {
+        "file": {
+            "filename": "test.png",
+            "mimetype": "image/png",
+            "url": "https://s3/test.png",
+        },
+        "other": "value",
+    }
+
+
+@pytest.mark.asyncio
+async def test_serialize_files_async_mixed_and_nested():
+    f = AsyncDummyFile()
+    complex_data = {
+        "list_of_files": [f, {"nested": f}],
+        "string": "test",
+        "integer": 123,
+        "empty_list": [],
+        "empty_dict": {},
+    }
+    res = await _serialize_files_async(complex_data)
+
+    expected_f = {
+        "filename": "test.png",
+        "mimetype": "image/png",
+        "url": "https://s3/test.png",
+    }
+    assert res == {
+        "list_of_files": [expected_f, {"nested": expected_f}],
+        "string": "test",
+        "integer": 123,
+        "empty_list": [],
+        "empty_dict": {},
+    }
+
+
+@pytest.mark.asyncio
+async def test_serialize_files_async_missing_attributes():
+    class IncompleteFile:
+        async def get_presigned_url_async(self):
+            return "https://example.com"
+
+    f = IncompleteFile()
+    res = await _serialize_files_async(f)
+    assert res is f  # Passes through untouched
+
+
+@pytest.mark.asyncio
+async def test_serialize_files_async_upload_failure():
+    f = AsyncDummyFile(presigned_url=Exception("Mock S3 Error"))
+    with pytest.raises(Exception, match="Mock S3 Error"):
+        await _serialize_files_async(f)
+
+
+@pytest.mark.asyncio
+async def test_serialize_files_async_concurrency_timing():
+    delay = 0.1
+    files = [AsyncDummyFile(delay=delay) for _ in range(5)]
+
+    start_time = time.monotonic()
+    await _serialize_files_async(files)
+    duration = time.monotonic() - start_time
+
+    # If sequential, it would take 0.5s. If concurrent, it should take ~0.1s.
+    assert duration < 0.25, f"Expected concurrent execution, but took {duration:.2f}s"
