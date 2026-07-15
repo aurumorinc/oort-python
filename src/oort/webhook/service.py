@@ -33,6 +33,32 @@ def _serialize_files(obj: Any) -> Any:
     return obj
 
 
+async def _serialize_files_async(obj: Any) -> Any:
+    """Recursively converts File objects into dicts for JSON serialization asynchronously."""
+    if isinstance(obj, list):
+        if not obj:
+            return []
+        return list(await asyncio.gather(*[_serialize_files_async(i) for i in obj]))
+    if isinstance(obj, dict):
+        if not obj:
+            return {}
+        keys = list(obj.keys())
+        values = await asyncio.gather(*[_serialize_files_async(obj[k]) for k in keys])
+        return dict(zip(keys, values))
+    if (
+        hasattr(obj, "get_presigned_url_async")
+        and hasattr(obj, "mimetype")
+        and hasattr(obj, "filename")
+    ):
+        url = await obj.get_presigned_url_async()
+        return {
+            "filename": obj.filename,
+            "mimetype": obj.mimetype,
+            "url": url,
+        }
+    return obj
+
+
 async def dispatch_webhook(
     webhook: Optional[WebhookRequest], payload: WebhookResponse
 ) -> None:
@@ -167,7 +193,9 @@ def webhook_dispatch(
                         type=type_str,
                         id=task_id,
                         webhookId=uuid.uuid4().hex,
-                        data=_serialize_files(data) if data is not None else [],
+                        data=await _serialize_files_async(data)
+                        if data is not None
+                        else [],
                         metadata=webhook.metadata,
                         error=getattr(response, "error", None) if not success else None,
                     )
