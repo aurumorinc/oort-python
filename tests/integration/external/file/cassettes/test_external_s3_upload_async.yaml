@@ -1,0 +1,131 @@
+interactions:
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        aGVsbG8gZnJvbSBleHRlcm5hbCBhc3luYyB0ZXN0
+      - 0
+      - null
+    headers:
+      Content-Length:
+      - '30'
+      Content-Type:
+      - !!binary |
+        dGV4dC9wbGFpbg==
+      Date:
+      - !!binary |
+        VGh1LCAxNiBKdWwgMjAyNiAxMzo1OTo1MSBHTVQ=
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My40NiBtZC9Cb3RvY29yZSMxLjQzLjQ2IHVhLzIuMSBvcy9saW51eCM2LjE3LjAt
+        MTAyMC1nY3AgbWQvYXJjaCN4ODZfNjQgbGFuZy9weXRob24jMy4xNC4zIG1kL3B5aW1wbCNDUHl0
+        aG9uIG0vRCxiLFUsTixaLGUgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuNDY=
+      amz-sdk-invocation-id:
+      - !!binary |
+        MTNjNDUzMjctNDAwNC00NzhhLWIzOGMtZDg4MGQ0NjI5OGYz
+      amz-sdk-request:
+      - !!binary |
+        YXR0ZW1wdD0x
+      x-amz-checksum-crc32:
+      - !!binary |
+        WmJzZnJBPT0=
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://storage.googleapis.com/koda-asia-south1-bucket-iazx11/integration-async-test-fixture.txt
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Content-Type:
+      - text/html; charset=UTF-8
+      Date:
+      - Thu, 16 Jul 2026 13:59:51 GMT
+      ETag:
+      - '"d58e9f3bc8a8627e7348ec79a93ab684"'
+      Server:
+      - UploadServer
+      Vary:
+      - Origin
+      X-GUploader-UploadID:
+      - AKhXX7Ip2_5en0cXbfbMYDj80CyZSJqdjpR_dXj1iEAGJVwo8f8rwIjn8MSp3eaEbHNbPDfY
+      x-amz-checksum-crc32c:
+      - ylIvog==
+      x-goog-generation:
+      - '1784210391405777'
+      x-goog-hash:
+      - crc32c=ylIvog==
+      - md5=1Y6fO8ioYn5zSOx5qTq2hA==
+      x-goog-metageneration:
+      - '1'
+      x-goog-stored-content-encoding:
+      - identity
+      x-goog-stored-content-length:
+      - '30'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - storage.googleapis.com
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://storage.googleapis.com/koda-asia-south1-bucket-iazx11/integration-async-test-fixture.txt?AWSAccessKeyId=REDACTED&Expires=1784213991&Signature=REDACTED
+  response:
+    body:
+      string: hello from external async test
+    headers:
+      accept-ranges:
+      - bytes
+      cache-control:
+      - private, max-age=0
+      content-length:
+      - '30'
+      content-type:
+      - text/plain
+      date:
+      - Thu, 16 Jul 2026 13:59:51 GMT
+      etag:
+      - '"d58e9f3bc8a8627e7348ec79a93ab684"'
+      expires:
+      - Thu, 16 Jul 2026 13:59:51 GMT
+      last-modified:
+      - Thu, 16 Jul 2026 13:59:51 GMT
+      server:
+      - UploadServer
+      x-amz-checksum-crc32c:
+      - ylIvog==
+      x-goog-generation:
+      - '1784210391405777'
+      x-goog-hash:
+      - crc32c=ylIvog==
+      - md5=1Y6fO8ioYn5zSOx5qTq2hA==
+      x-goog-metageneration:
+      - '1'
+      x-goog-storage-class:
+      - STANDARD
+      x-goog-stored-content-encoding:
+      - identity
+      x-goog-stored-content-length:
+      - '30'
+      x-guploader-uploadid:
+      - AKhXX7Io7WN_-kQylf79PvBKfCtvkvb2LOP5Bh62LzCpjD-8fqLPZL2u602wg07-Kiojpk-K
+    status:
+      code: 200
+      message: OK
+version: 1
