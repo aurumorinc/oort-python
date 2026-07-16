@@ -15,6 +15,23 @@ s3_secret_key = os.getenv("S3_SECRET_KEY", "dummy-secret")
 s3_region = os.getenv("S3_REGION", "us-east-1")
 s3_endpoint_url = os.getenv("S3_ENDPOINT_URL")
 
+def scrub_large_bodies(request):
+    if request.body:
+        try:
+            body_len = len(request.body)
+            if body_len > 1024 * 1024:  # > 1MB
+                request.body = b"<SCRUBBED_LARGE_BODY>"
+        except TypeError:
+            # Body is an iterator or file-like object without len()
+            request.body = b"<SCRUBBED_LARGE_BODY_IO>"
+    return request
+
+def scrub_large_response_bodies(response):
+    body = response.get('body', {}).get('string')
+    if body and len(body) > 1024 * 1024:
+        response['body']['string'] = b"<SCRUBBED_LARGE_BODY>"
+    return response
+
 my_vcr = vcr.VCR(
     cassette_library_dir="tests/integration/external/file/cassettes",
     record_mode="once",
@@ -28,6 +45,8 @@ my_vcr = vcr.VCR(
         "Expires",
     ],
     match_on=["method", "scheme", "host", "port", "path"],
+    before_record_request=scrub_large_bodies,
+    before_record_response=scrub_large_response_bodies,
 )
 
 
@@ -61,6 +80,31 @@ def test_external_s3_upload_and_presign_sync(external_s3_config):
     response = requests.get(url)
     response.raise_for_status()
     assert response.content == data
+
+
+@my_vcr.use_cassette("test_external_s3_upload_multipart.yaml")
+def test_external_s3_upload_multipart(external_s3_config, tmp_path):
+    object_name = "integration-multipart-test-fixture.txt"
+    mimetype = "application/octet-stream"
+    
+    # Create a 10MB dummy file to force multipart upload (threshold is 8MB)
+    dummy_file = tmp_path / "dummy_10mb.bin"
+    dummy_data = os.urandom(10 * 1024 * 1024)
+    dummy_file.write_bytes(dummy_data)
+
+    # Upload using the file path string
+    upload(str(dummy_file), object_name, mimetype, external_s3_config)
+
+    # Generate URL
+    url = generate_presigned_url(object_name, external_s3_config)
+    assert url is not None
+    assert url.startswith("http")
+
+    # Make a HEAD request to verify the file was uploaded
+    response = requests.head(url)
+    response.raise_for_status()
+    # The content length should be exactly 10MB
+    assert int(response.headers["Content-Length"]) == 10 * 1024 * 1024
 
 
 @pytest.mark.asyncio

@@ -17,9 +17,15 @@ def _get_client(config: S3Config) -> Any:
         return _s3_client
 
     endpoint_url = config.endpoint_url
-    sig_version = "s3" if endpoint_url and "googleapis.com" in endpoint_url else "s3v4"
+    sig_version = "s3v4"
 
     config_kwargs: Dict[str, Any] = {"signature_version": sig_version}
+    
+    if endpoint_url and "googleapis.com" in endpoint_url:
+        # GCS requires explicit checksum handling to avoid 'Invalid argument' on SigV4
+        config_kwargs["request_checksum_calculation"] = "when_required"
+        config_kwargs["response_checksum_validation"] = "when_required"
+
     if config.path_style:
         config_kwargs["s3"] = {"addressing_style": "path"}
 

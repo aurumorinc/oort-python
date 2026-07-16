@@ -1,0 +1,216 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Length:
+      - '0'
+      Content-Type:
+      - !!binary |
+        YXBwbGljYXRpb24vb2N0ZXQtc3RyZWFt
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My40NiBtZC9Cb3RvY29yZSMxLjQzLjQ2IHVhLzIuMSBvcy9saW51eCM2LjE3LjAt
+        MTAyMC1nY3AgbWQvYXJjaCN4ODZfNjQgbGFuZy9weXRob24jMy4xNC4zIG1kL3B5aW1wbCNDUHl0
+        aG9uIG0vRyxhLE4sZSxELGMgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuNDY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        ZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3
+        ODUyYjg1NQ==
+      X-Amz-Date:
+      - !!binary |
+        MjAyNjA3MTZUMjI1ODMyWg==
+      amz-sdk-invocation-id:
+      - !!binary |
+        ZDE5YmQ2NDktOTY0NC00MzdjLWEwMTQtOWY4ZmQ3MDJiNDYw
+      amz-sdk-request:
+      - !!binary |
+        YXR0ZW1wdD0x
+    method: POST
+    uri: https://storage.googleapis.com/koda-asia-south1-bucket-iazx11/integration-multipart-test-fixture.txt
+  response:
+    body:
+      string: <?xml version='1.0' encoding='UTF-8'?><InitiateMultipartUploadResult
+        xmlns='http://s3.amazonaws.com/doc/2006-03-01/'><Bucket>koda-asia-south1-bucket-iazx11</Bucket><Key>integration-multipart-test-fixture.txt</Key><UploadId>ABPnzm7QwRtOWy3opByEYpPEBLKZXfp8q502qUkcgniuR17EFDgx3AFZBrJEC26YPmWbuTPD</UploadId></InitiateMultipartUploadResult>
+    headers:
+      Content-Length:
+      - '338'
+      Content-Type:
+      - text/html; charset=UTF-8
+      Date:
+      - Thu, 16 Jul 2026 22:58:32 GMT
+      Server:
+      - UploadServer
+      Vary:
+      - Origin
+      X-GUploader-UploadID:
+      - AKhXX7Id8XvI6VPs-HdlYljCxH6DiuXSZCT9V24VJETvK5-5MW7O8E4-cy_PLVYnuSY2B95fXjZriFNr3Z7_
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        PFNDUlVCQkVEX0xBUkdFX0JPRFlfSU8+
+      - 0
+      - null
+    headers:
+      Content-Length:
+      - '2097152'
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My40NiBtZC9Cb3RvY29yZSMxLjQzLjQ2IHVhLzIuMSBvcy9saW51eCM2LjE3LjAt
+        MTAyMC1nY3AgbWQvYXJjaCN4ODZfNjQgbGFuZy9weXRob24jMy4xNC4zIG1kL3B5aW1wbCNDUHl0
+        aG9uIG0vRyxhLE4sZSxELGMgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuNDY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        NGQ2ZjgyNjExZGYxZmIxNjBhMDQ2ZTRhMGI2MTgxNWM2N2M1YzQxMTUwNWJhMjE5NmRlMzYxMzE3
+        N2I0YTFkMg==
+      X-Amz-Date:
+      - !!binary |
+        MjAyNjA3MTZUMjI1ODMyWg==
+      amz-sdk-invocation-id:
+      - !!binary |
+        ZGY0MjNlYzktMzgyOS00MzFmLWEzMGItMGQyM2M2Njg2YjBj
+      amz-sdk-request:
+      - !!binary |
+        YXR0ZW1wdD0x
+    method: PUT
+    uri: https://storage.googleapis.com/koda-asia-south1-bucket-iazx11/integration-multipart-test-fixture.txt?partNumber=2&uploadId=ABPnzm7QwRtOWy3opByEYpPEBLKZXfp8q502qUkcgniuR17EFDgx3AFZBrJEC26YPmWbuTPD
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Content-Type:
+      - text/html; charset=UTF-8
+      Date:
+      - Thu, 16 Jul 2026 22:58:32 GMT
+      ETag:
+      - '"ac00f9b92474645a71de98ac71e2bd97"'
+      Server:
+      - UploadServer
+      Vary:
+      - Origin
+      X-GUploader-UploadID:
+      - AKhXX7IGyFExM4ibiGYXWlim0PoiqopJ8jXjAP0cHI6PO3tDbDWa-iZ7ePURVfpsgbluh-slpNCmJQBSpJPR
+      x-goog-hash:
+      - crc32c=CtphHA==
+      - md5=rAD5uSR0ZFpx3pisceK9lw==
+    status:
+      code: 200
+      message: OK
+- request:
+    body: <CompleteMultipartUpload xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Part><ETag>"5a79f67be2113d7e0b6404422266f6e6"</ETag><PartNumber>1</PartNumber></Part><Part><ETag>"ac00f9b92474645a71de98ac71e2bd97"</ETag><PartNumber>2</PartNumber></Part></CompleteMultipartUpload>
+    headers:
+      Content-Length:
+      - '271'
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My40NiBtZC9Cb3RvY29yZSMxLjQzLjQ2IHVhLzIuMSBvcy9saW51eCM2LjE3LjAt
+        MTAyMC1nY3AgbWQvYXJjaCN4ODZfNjQgbGFuZy9weXRob24jMy4xNC4zIG1kL3B5aW1wbCNDUHl0
+        aG9uIG0vRyxhLE4sZSxELGMgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuNDY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        MzFkMzI1NTBkMzc4NGUyMDEyYzA3NDViNWQwODNkZThiMzMxOThhNjg3NmVjYzZlZWJlM2Q3NjFi
+        YzIwOTcwMQ==
+      X-Amz-Date:
+      - !!binary |
+        MjAyNjA3MTZUMjI1ODMyWg==
+      amz-sdk-invocation-id:
+      - !!binary |
+        Y2M2MWI2OGMtODU1Ny00NGJlLWI3NWQtOGJhYjY1ZGQ3YTFh
+      amz-sdk-request:
+      - !!binary |
+        YXR0ZW1wdD0x
+    method: POST
+    uri: https://storage.googleapis.com/koda-asia-south1-bucket-iazx11/integration-multipart-test-fixture.txt?uploadId=ABPnzm7QwRtOWy3opByEYpPEBLKZXfp8q502qUkcgniuR17EFDgx3AFZBrJEC26YPmWbuTPD
+  response:
+    body:
+      string: <?xml version='1.0' encoding='UTF-8'?><CompleteMultipartUploadResult
+        xmlns='http://s3.amazonaws.com/doc/2006-03-01/'><Location>http://storage.googleapis.com/koda-asia-south1-bucket-iazx11/integration-multipart-test-fixture.txt</Location><Bucket>koda-asia-south1-bucket-iazx11</Bucket><Key>integration-multipart-test-fixture.txt</Key><ETag>"949452e67b050a9a6ae31422b5384e67-2"</ETag></CompleteMultipartUploadResult>
+    headers:
+      Content-Length:
+      - '414'
+      Content-Type:
+      - text/html; charset=UTF-8
+      Date:
+      - Thu, 16 Jul 2026 22:58:32 GMT
+      Server:
+      - UploadServer
+      Vary:
+      - Origin
+      X-GUploader-UploadID:
+      - AKhXX7IpWDLn94lqN-hNlao8rA8N82tLPv5pswURMEV33ehmWuxDVf9Z5X86zH93JpMSjfZ1UGx91V4hcVLX
+      x-amz-checksum-crc32c:
+      - Qgp1RQ==
+      x-goog-generation:
+      - '1784242712746560'
+      x-goog-hash:
+      - crc32c=Qgp1RQ==
+      x-goog-metageneration:
+      - '1'
+      x-goog-stored-content-length:
+      - '10485760'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://storage.googleapis.com/koda-asia-south1-bucket-iazx11/integration-multipart-test-fixture.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-SignedHeaders=host
+  response:
+    body:
+      string: ''
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-Control:
+      - private, max-age=0
+      Content-Length:
+      - '10485760'
+      Content-Type:
+      - application/octet-stream
+      Date:
+      - Thu, 16 Jul 2026 22:58:32 GMT
+      ETag:
+      - '"949452e67b050a9a6ae31422b5384e67-2"'
+      Expires:
+      - Thu, 16 Jul 2026 22:58:32 GMT
+      Last-Modified:
+      - Thu, 16 Jul 2026 22:58:32 GMT
+      Server:
+      - UploadServer
+      X-GUploader-UploadID:
+      - AKhXX7JZgGKtiSjrLvHYcq3tBHby4tKu-Zaw9C8pR7C8X33mppR-5Bu1njNa-7tcrCRb5VnAxWoZ9E_CDzXO
+      x-amz-checksum-crc32c:
+      - Qgp1RQ==
+      x-goog-generation:
+      - '1784242712746560'
+      x-goog-hash:
+      - crc32c=Qgp1RQ==
+      x-goog-metageneration:
+      - '1'
+      x-goog-storage-class:
+      - STANDARD
+      x-goog-stored-content-encoding:
+      - identity
+      x-goog-stored-content-length:
+      - '10485760'
+    status:
+      code: 200
+      message: OK
+version: 1
