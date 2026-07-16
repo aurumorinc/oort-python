@@ -11,9 +11,6 @@ readme = "README.md"
 license = {text = "MIT"}
 
 
-[tool.pdm]
-distribution = true
-
 [dependency-groups]
 dev = [
     "bumpver>=2026.1132",
@@ -24,6 +21,7 @@ dev = [
     "respx>=0.23.1",
     "pytest-asyncio>=1.4.0",
     "pyrefly>=1.1.1",
+    "vcrpy>=8.3.0",
 ]
 
 [tool.bumpver]
@@ -57,3 +55,7 @@ project-excludes = [
 exclude = [
     "references",
 ]
+
+[tool.pdm]
+distribution = true
+
