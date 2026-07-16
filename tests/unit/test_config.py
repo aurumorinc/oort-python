@@ -1,10 +1,10 @@
-
 from oort.config import OortSettings
 from oort.file.schema import S3Config
 
 
 import os
 from unittest.mock import patch
+
 
 @patch.dict(os.environ, {}, clear=True)
 def test_oort_settings_s3_property_valid():
@@ -16,7 +16,7 @@ def test_oort_settings_s3_property_valid():
         s3_region="us-west-2",
         s3_path_style=True,
     )
-    
+
     s3_config = settings.s3
     assert isinstance(s3_config, S3Config)
     assert s3_config.bucket == "my-bucket"
