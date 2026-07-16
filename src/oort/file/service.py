@@ -42,7 +42,7 @@ def _get_client(config: S3Config) -> Any:
         raise S3ConfigurationError(f"Failed to initialize S3 client: {e}") from e
 
 
-def _upload_sync(
+def upload(
     data: Union[bytes, str], object_name: str, mimetype: str, config: S3Config
 ) -> None:
     client = _get_client(config)
@@ -61,7 +61,7 @@ def _upload_sync(
         raise S3ConfigurationError(f"Failed to upload object {object_name}: {e}") from e
 
 
-def _generate_presigned_url_sync(
+def generate_presigned_url(
     object_name: str, config: S3Config, expires_in: Optional[int] = None
 ) -> str:
     client = _get_client(config)
@@ -79,20 +79,20 @@ def _generate_presigned_url_sync(
         ) from e
 
 
-async def upload(
+async def aupload(
     data: Union[bytes, str], object_name: str, mimetype: str, config: S3Config
 ) -> None:
     """Asynchronously uploads data or a file path to S3."""
-    await asyncio.to_thread(_upload_sync, data, object_name, mimetype, config)
+    await asyncio.to_thread(upload, data, object_name, mimetype, config)
 
 
-async def generate_presigned_url(
+async def agenerate_presigned_url(
     object_name: str, config: S3Config, expires_in: Optional[int] = None
 ) -> str:
     """Asynchronously generates a presigned URL for an S3 object."""
     return await asyncio.to_thread(
-        _generate_presigned_url_sync, object_name, config, expires_in
+        generate_presigned_url, object_name, config, expires_in
     )
 
 
-__all__ = ["upload", "generate_presigned_url"]
+__all__ = ["upload", "generate_presigned_url", "aupload", "agenerate_presigned_url"]
