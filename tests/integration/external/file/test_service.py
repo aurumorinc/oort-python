@@ -5,7 +5,7 @@ import vcr
 from dotenv import load_dotenv
 
 from oort.file.schema import S3Config
-from oort.file.service import upload, generate_presigned_url, aupload, agenerate_presigned_url
+from oort.file.service import upload, generate_presigned_url
 
 load_dotenv()
 
@@ -19,9 +19,17 @@ my_vcr = vcr.VCR(
     cassette_library_dir="tests/integration/external/file/cassettes",
     record_mode="once",
     filter_headers=["Authorization"],
-    filter_query_parameters=["X-Amz-Credential", "X-Amz-Signature", "AWSAccessKeyId", "Signature", "X-Amz-Date", "Expires"],
-    match_on=["method", "scheme", "host", "port", "path"]
+    filter_query_parameters=[
+        "X-Amz-Credential",
+        "X-Amz-Signature",
+        "AWSAccessKeyId",
+        "Signature",
+        "X-Amz-Date",
+        "Expires",
+    ],
+    match_on=["method", "scheme", "host", "port", "path"],
 )
+
 
 @pytest.fixture
 def external_s3_config():
@@ -31,8 +39,9 @@ def external_s3_config():
         access_key=s3_access_key,
         secret_key=s3_secret_key,
         region=s3_region,
-        endpoint_url=s3_endpoint_url
+        endpoint_url=s3_endpoint_url,
     )
+
 
 @my_vcr.use_cassette("test_external_s3_upload_sync.yaml")
 def test_external_s3_upload_and_presign_sync(external_s3_config):
@@ -53,6 +62,7 @@ def test_external_s3_upload_and_presign_sync(external_s3_config):
     response.raise_for_status()
     assert response.content == data
 
+
 @pytest.mark.asyncio
 @my_vcr.use_cassette("test_external_s3_upload_async.yaml")
 async def test_external_s3_upload_and_presign_async(external_s3_config):
@@ -61,15 +71,16 @@ async def test_external_s3_upload_and_presign_async(external_s3_config):
     mimetype = "text/plain"
 
     # Upload
-    await aupload(data, object_name, mimetype, external_s3_config)
+    await upload(data, object_name, mimetype, external_s3_config)
 
     # Generate URL
-    url = await agenerate_presigned_url(object_name, external_s3_config)
+    url = await generate_presigned_url(object_name, external_s3_config)
     assert url is not None
     assert url.startswith("http")
 
     # Fetch and verify
     import httpx
+
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         response.raise_for_status()
