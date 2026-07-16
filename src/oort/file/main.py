@@ -5,12 +5,18 @@ import tempfile
 import shutil
 import mimetypes
 import base64
-from typing import Optional, Any, Union
+from typing import Optional, Any, Union, Awaitable
 import builtins
 import requests
 import logging
 
-from oort.file.service import upload, generate_presigned_url, aupload, agenerate_presigned_url
+from oort.utils import is_async_context
+from oort.file.service import (
+    _upload,
+    _generate_presigned_url,
+    _aupload,
+    _agenerate_presigned_url,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +70,13 @@ class File:
         return f"data:{self.mimetype};base64,{b64_str}"
 
     @property
-    def presigned_url(self) -> Optional[str]:
+    def presigned_url(self) -> Union[Optional[str], Awaitable[Optional[str]]]:
         """Lazily uploads the file to S3 and returns the presigned URL."""
+        if is_async_context():
+            return self._aget_presigned_url()
+        return self._get_presigned_url()
+
+    def _get_presigned_url(self) -> Optional[str]:
         if self._presigned_url:
             return self._presigned_url
 
@@ -77,17 +88,14 @@ class File:
             )
             return None
 
-        # Ensure a unique object name in S3 to prevent collisions
         self._object_name = f"{uuid.uuid4().hex}_{self.filename}"
         logger.info("Uploading %s to S3 as %s...", self.path, self._object_name)
 
-        # Utilize upload service (passing the local file path)
-        upload(self.path, self._object_name, self.mimetype, settings.s3)
-        self._presigned_url = generate_presigned_url(self._object_name, settings.s3)
+        _upload(self.path, self._object_name, self.mimetype, settings.s3)
+        self._presigned_url = _generate_presigned_url(self._object_name, settings.s3)
         return self._presigned_url
 
-    async def aget_presigned_url(self) -> Optional[str]:
-        """Async version of presigned_url property."""
+    async def _aget_presigned_url(self) -> Optional[str]:
         if self._presigned_url:
             return self._presigned_url
 
@@ -102,8 +110,8 @@ class File:
         self._object_name = f"{uuid.uuid4().hex}_{self.filename}"
         logger.info("Uploading %s to S3 as %s...", self.path, self._object_name)
 
-        await aupload(self.path, self._object_name, self.mimetype, settings.s3)
-        self._presigned_url = await agenerate_presigned_url(
+        await _aupload(self.path, self._object_name, self.mimetype, settings.s3)
+        self._presigned_url = await _agenerate_presigned_url(
             self._object_name, settings.s3
         )
         return self._presigned_url
@@ -207,10 +215,31 @@ class File:
         return cls(path, filename, mimetype)
 
     @classmethod
-    async def afrom_playwright_download(
+    def from_playwright_download(
+        cls, download: Any, filename: Optional[str] = None
+    ) -> Union["File", Awaitable["File"]]:
+        if is_async_context():
+            return cls._afrom_playwright_download(download, filename)
+        return cls._from_playwright_download(download, filename)
+
+    @classmethod
+    def _from_playwright_download(
         cls, download: Any, filename: Optional[str] = None
     ) -> "File":
-        """Awaits playwright download and wraps the resulting file."""
+        if not filename:
+            filename = download.suggested_filename
+
+        mimetype, _ = mimetypes.guess_type(filename)
+        mimetype = mimetype or "application/octet-stream"
+
+        path = cls._get_temp_path(filename)
+        download.save_as(path)
+        return cls(path, filename, mimetype)
+
+    @classmethod
+    async def _afrom_playwright_download(
+        cls, download: Any, filename: Optional[str] = None
+    ) -> "File":
         if not filename:
             filename = download.suggested_filename
 

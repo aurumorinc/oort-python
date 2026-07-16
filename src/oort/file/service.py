@@ -1,10 +1,11 @@
 import asyncio
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, Awaitable
 import boto3
 from botocore.config import Config
 
 from oort.exceptions import S3ConfigurationError
 from oort.file.schema import S3Config
+from oort.utils import is_async_context
 
 _s3_client: Optional[Any] = None
 
@@ -42,7 +43,7 @@ def _get_client(config: S3Config) -> Any:
         raise S3ConfigurationError(f"Failed to initialize S3 client: {e}") from e
 
 
-def upload(
+def _upload(
     data: Union[bytes, str], object_name: str, mimetype: str, config: S3Config
 ) -> None:
     client = _get_client(config)
@@ -61,7 +62,7 @@ def upload(
         raise S3ConfigurationError(f"Failed to upload object {object_name}: {e}") from e
 
 
-def generate_presigned_url(
+def _generate_presigned_url(
     object_name: str, config: S3Config, expires_in: Optional[int] = None
 ) -> str:
     client = _get_client(config)
@@ -79,20 +80,36 @@ def generate_presigned_url(
         ) from e
 
 
-async def aupload(
+async def _aupload(
     data: Union[bytes, str], object_name: str, mimetype: str, config: S3Config
 ) -> None:
     """Asynchronously uploads data or a file path to S3."""
-    await asyncio.to_thread(upload, data, object_name, mimetype, config)
+    await asyncio.to_thread(_upload, data, object_name, mimetype, config)
 
 
-async def agenerate_presigned_url(
+async def _agenerate_presigned_url(
     object_name: str, config: S3Config, expires_in: Optional[int] = None
 ) -> str:
     """Asynchronously generates a presigned URL for an S3 object."""
     return await asyncio.to_thread(
-        generate_presigned_url, object_name, config, expires_in
+        _generate_presigned_url, object_name, config, expires_in
     )
 
 
-__all__ = ["upload", "generate_presigned_url", "aupload", "agenerate_presigned_url"]
+def upload(
+    data: Union[bytes, str], object_name: str, mimetype: str, config: S3Config
+) -> Union[None, Awaitable[None]]:
+    if is_async_context():
+        return _aupload(data, object_name, mimetype, config)
+    return _upload(data, object_name, mimetype, config)
+
+
+def generate_presigned_url(
+    object_name: str, config: S3Config, expires_in: Optional[int] = None
+) -> Union[str, Awaitable[str]]:
+    if is_async_context():
+        return _agenerate_presigned_url(object_name, config, expires_in)
+    return _generate_presigned_url(object_name, config, expires_in)
+
+
+__all__ = ["upload", "generate_presigned_url"]
