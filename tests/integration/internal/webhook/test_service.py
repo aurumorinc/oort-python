@@ -1,7 +1,7 @@
 import pytest
 import respx
 import httpx
-from oort.webhook.service import webhook_dispatch, awebhook_dispatch
+from oort.webhook.service import webhook_dispatch
 from oort.webhook.schema import WebhookRequest
 
 
@@ -28,10 +28,11 @@ async def test_webhook_integration_async(webhook):
             self.mimetype = mimetype
             self._presigned_url = presigned_url
 
-        async def aget_presigned_url(self):
+        @property
+        async def presigned_url(self):
             return self._presigned_url
 
-    @awebhook_dispatch(event_prefix="test")
+    @webhook_dispatch(event_prefix="test")
     async def process_data(data: str, webhook: WebhookRequest = None):
         return {"success": True, "output": {"data": data, "file": AsyncDummyFile()}}
 

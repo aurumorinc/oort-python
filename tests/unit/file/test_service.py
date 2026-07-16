@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from oort.file.service import upload, generate_presigned_url, aupload, agenerate_presigned_url
+from oort.file.service import upload, generate_presigned_url
 from oort.file.schema import S3Config
 
 
@@ -33,14 +33,14 @@ def test_upload_bytes_sync(mock_session_cls, s3_config):
 @patch("oort.file.service._s3_client", None)
 @patch("oort.file.service.boto3.Session", spec=True)
 @pytest.mark.asyncio
-async def test_aupload_bytes_async(mock_session_cls, s3_config):
+async def test_upload_bytes_async(mock_session_cls, s3_config):
     mock_session = MagicMock()
     mock_client = MagicMock()
     mock_session.client.return_value = mock_client
     mock_session_cls.return_value = mock_session
 
     data = b"hello"
-    await aupload(data, "test.txt", "text/plain", s3_config)
+    await upload(data, "test.txt", "text/plain", s3_config)
 
     mock_client.put_object.assert_called_once_with(
         Bucket="test-bucket", Key="test.txt", Body=b"hello", ContentType="text/plain"
@@ -73,7 +73,7 @@ def test_upload_file_path_sync(mock_session_cls, s3_config):
 @patch("oort.file.service._s3_client", None)
 @patch("oort.file.service.boto3.Session", spec=True)
 @pytest.mark.asyncio
-async def test_aupload_file_path_async(mock_session_cls, s3_config):
+async def test_upload_file_path_async(mock_session_cls, s3_config):
     mock_session = MagicMock()
     mock_client = MagicMock()
     mock_session.client.return_value = mock_client
@@ -86,7 +86,7 @@ async def test_aupload_file_path_async(mock_session_cls, s3_config):
     os.close(fd)
 
     try:
-        await aupload(path, "test.txt", "text/plain", s3_config)
+        await upload(path, "test.txt", "text/plain", s3_config)
         mock_client.upload_file.assert_called_once_with(
             path, "test-bucket", "test.txt", ExtraArgs={"ContentType": "text/plain"}
         )
@@ -117,7 +117,7 @@ def test_generate_presigned_url_sync(mock_session_cls, s3_config):
 @patch("oort.file.service._s3_client", None)
 @patch("oort.file.service.boto3.Session", spec=True)
 @pytest.mark.asyncio
-async def test_agenerate_presigned_url_async(mock_session_cls, s3_config):
+async def test_generate_presigned_url_async(mock_session_cls, s3_config):
     mock_session = MagicMock()
     mock_client = MagicMock()
     mock_session.client.return_value = mock_client
@@ -125,7 +125,7 @@ async def test_agenerate_presigned_url_async(mock_session_cls, s3_config):
 
     mock_client.generate_presigned_url.return_value = "https://example.com"
 
-    url = await agenerate_presigned_url("test.txt", s3_config)
+    url = await generate_presigned_url("test.txt", s3_config)
     assert url == "https://example.com"
 
     mock_client.generate_presigned_url.assert_called_once_with(

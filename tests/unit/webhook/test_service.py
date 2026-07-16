@@ -7,7 +7,6 @@ from oort.webhook.service import (
     dispatch_webhook,
     adispatch_webhook,
     webhook_dispatch,
-    awebhook_dispatch,
     _serialize_files,
     _aserialize_files,
 )
@@ -62,7 +61,7 @@ def test_dispatch_webhook_sync(mock_client_cls, webhook):
 
 @patch("oort.webhook.service.httpx.AsyncClient", spec=True)
 @pytest.mark.asyncio
-async def test_adispatch_webhook(mock_client_cls, webhook):
+async def test_dispatch_webhook_async(mock_client_cls, webhook):
     mock_client = AsyncMock()
     mock_response = MagicMock()
     mock_client.request.return_value = mock_response
@@ -97,22 +96,24 @@ async def test_adispatch_webhook(mock_client_cls, webhook):
 
 @patch("oort.webhook.service.adispatch_webhook")
 @pytest.mark.asyncio
-async def test_awebhook_dispatch_async_decorator(mock_dispatch, webhook):
-    @awebhook_dispatch(event_prefix="test")
+async def test_webhook_dispatch_async_decorator(mock_dispatch, webhook):
+    @webhook_dispatch(event_prefix="test")
     async def dummy_async_func(data: str, webhook: WebhookRequest = None):
         return MockResponseModel(success=True, output={"result": data})
 
     res = await dummy_async_func("test", webhook=webhook)
     assert res.success is True
 
-    # Check that adispatch_webhook was called for STARTED and COMPLETED
+    # Check that _adispatch_webhook was called for STARTED and COMPLETED
     assert mock_dispatch.call_count == 2
 
     call1 = mock_dispatch.call_args_list[0]
-    assert call1.kwargs["payload"].type == "test.started"
+    payload1 = call1.kwargs.get("payload") or call1.args[1]
+    assert payload1.type == "test.started"
 
     call2 = mock_dispatch.call_args_list[1]
-    assert call2.kwargs["payload"].type == "test.completed"
+    payload2 = call2.kwargs.get("payload") or call2.args[1]
+    assert payload2.type == "test.completed"
 
 
 @patch("oort.webhook.service.dispatch_webhook")
@@ -126,10 +127,12 @@ def test_webhook_dispatch_sync_decorator(mock_dispatch, webhook):
 
     assert mock_dispatch.call_count == 2
     call1 = mock_dispatch.call_args_list[0]
-    assert call1.kwargs["payload"].type == "test.started"
+    payload1 = call1.kwargs.get("payload") or call1.args[1]
+    assert payload1.type == "test.started"
 
     call2 = mock_dispatch.call_args_list[1]
-    assert call2.kwargs["payload"].type == "test.completed"
+    payload2 = call2.kwargs.get("payload") or call2.args[1]
+    assert payload2.type == "test.completed"
 
 
 def test_serialize_files():
@@ -181,7 +184,8 @@ class AsyncDummyFile:
         self._presigned_url = presigned_url
         self.delay = delay
 
-    async def aget_presigned_url(self):
+    @property
+    async def presigned_url(self):
         if self.delay > 0:
             await asyncio.sleep(self.delay)
         if isinstance(self._presigned_url, Exception):
@@ -255,7 +259,8 @@ async def test_aserialize_files_mixed_and_nested():
 @pytest.mark.asyncio
 async def test_aserialize_files_missing_attributes():
     class IncompleteFile:
-        async def aget_presigned_url(self):
+        @property
+        async def presigned_url(self):
             return "https://example.com"
 
     f = IncompleteFile()
