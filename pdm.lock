@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:6d9b3f44f3001abf665605509709f5adea9f498026a720d6b1d45fc206cab9ca"
+content_hash = "sha256:351ccd594419c306f00ce1c7897c5541eaa08a0b03c4dfb61e1a15f0c7d68bc7"
 
 [[metadata.targets]]
 requires_python = ">=3.11"
@@ -1241,6 +1241,19 @@ summary = ""
 files = [
     {file = "urllib3-2.7.0-py3-none-any.whl", hash = "sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"},
     {file = "urllib3-2.7.0.tar.gz", hash = "sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c"},
+]
+
+[[package]]
+name = "vcrpy"
+version = "8.3.0"
+summary = ""
+dependencies = [
+    "pyyaml",
+    "wrapt",
+]
+files = [
+    {file = "vcrpy-8.3.0-py3-none-any.whl", hash = "sha256:bd66e6143746778157f00e2a922527a8d96b2fdc350be8988a45a29c843815b9"},
+    {file = "vcrpy-8.3.0.tar.gz", hash = "sha256:46d64e77e8d95e5c76c7d9a94ff05d8b38b2ae4e1d4869eb0235024b6fcb5212"},
 ]
 
 [[package]]

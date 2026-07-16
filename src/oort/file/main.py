@@ -8,10 +8,9 @@ import base64
 from typing import Optional, Any, Union
 import builtins
 import requests
-from asgiref.sync import async_to_sync
 import logging
 
-from oort.file.service import upload, generate_presigned_url
+from oort.file.service import upload, generate_presigned_url, aupload, agenerate_presigned_url
 
 logger = logging.getLogger(__name__)
 
@@ -83,14 +82,11 @@ class File:
         logger.info("Uploading %s to S3 as %s...", self.path, self._object_name)
 
         # Utilize upload service (passing the local file path)
-        _upload = async_to_sync(upload)
-        _generate = async_to_sync(generate_presigned_url)
-
-        _upload(self.path, self._object_name, self.mimetype, settings.s3)
-        self._presigned_url = _generate(self._object_name, settings.s3)
+        upload(self.path, self._object_name, self.mimetype, settings.s3)
+        self._presigned_url = generate_presigned_url(self._object_name, settings.s3)
         return self._presigned_url
 
-    async def get_presigned_url_async(self) -> Optional[str]:
+    async def aget_presigned_url(self) -> Optional[str]:
         """Async version of presigned_url property."""
         if self._presigned_url:
             return self._presigned_url
@@ -106,8 +102,8 @@ class File:
         self._object_name = f"{uuid.uuid4().hex}_{self.filename}"
         logger.info("Uploading %s to S3 as %s...", self.path, self._object_name)
 
-        await upload(self.path, self._object_name, self.mimetype, settings.s3)
-        self._presigned_url = await generate_presigned_url(
+        await aupload(self.path, self._object_name, self.mimetype, settings.s3)
+        self._presigned_url = await agenerate_presigned_url(
             self._object_name, settings.s3
         )
         return self._presigned_url
@@ -211,7 +207,7 @@ class File:
         return cls(path, filename, mimetype)
 
     @classmethod
-    async def from_playwright_download(
+    async def afrom_playwright_download(
         cls, download: Any, filename: Optional[str] = None
     ) -> "File":
         """Awaits playwright download and wraps the resulting file."""

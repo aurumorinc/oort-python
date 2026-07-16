@@ -2,30 +2,40 @@ import pytest
 import boto3
 from moto import mock_aws
 
-from oort.file.schema import S3Config
 from oort.file.main import File
+
+
+import os
+from unittest.mock import patch
 
 
 @pytest.fixture(autouse=True)
 def setup_moto():
-    with mock_aws():
-        client = boto3.client("s3", region_name="us-east-1")
-        client.create_bucket(Bucket="test-bucket")
+    import oort.file.service
+    oort.file.service._s3_client = None
 
-        s3_config = S3Config(
-            bucket="test-bucket",
-            access_key="fake-key",
-            secret_key="fake-secret",
-            region="us-east-1",
-        )
-        # Mock settings for integration test
-        from oort.config import settings
+    with patch.dict(os.environ, {
+        "AWS_ACCESS_KEY_ID": "testing",
+        "AWS_SECRET_ACCESS_KEY": "testing",
+        "AWS_SECURITY_TOKEN": "testing",
+        "AWS_SESSION_TOKEN": "testing",
+        "AWS_DEFAULT_REGION": "us-east-1"
+    }, clear=True):
+        with mock_aws():
+            client = boto3.client("s3", region_name="us-east-1")
+            client.create_bucket(Bucket="test-bucket")
 
-        settings.s3_bucket = "test-bucket"
-        settings.s3_access_key = "fake-key"
-        settings.s3_secret_key = "fake-secret"
-        settings.s3_region = "us-east-1"
-        yield
+            # Mock settings for integration test
+            from oort.config import settings
+
+            settings.s3_bucket = "test-bucket"
+            settings.s3_access_key = "testing"
+            settings.s3_secret_key = "testing"
+            settings.s3_region = "us-east-1"
+            
+            yield
+            
+            oort.file.service._s3_client = None
 
 
 def test_file_integration_sync():
@@ -48,7 +58,7 @@ def test_file_integration_sync():
 async def test_file_integration_async():
     """Test file presigned URL generation and upload via File wrapper (async context)"""
     f = File.from_bytes(b"hello world async", "integration_async.txt", "text/plain")
-    url = await f.get_presigned_url_async()
+    url = await f.aget_presigned_url()
 
     assert url is not None
     assert "https://s3.amazonaws.com/test-bucket/" in url or "test-bucket" in url

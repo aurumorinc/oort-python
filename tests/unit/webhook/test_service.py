@@ -5,9 +5,11 @@ import time
 from pydantic import BaseModel
 from oort.webhook.service import (
     dispatch_webhook,
+    adispatch_webhook,
     webhook_dispatch,
+    awebhook_dispatch,
     _serialize_files,
-    _serialize_files_async,
+    _aserialize_files,
 )
 from oort.webhook.schema import WebhookRequest, WebhookResponse, WebhookEvent
 
@@ -25,15 +27,13 @@ class MockResponseModel(BaseModel):
     output: dict
 
 
-@patch("oort.webhook.service.httpx.AsyncClient", spec=True)
-@pytest.mark.asyncio
-async def test_dispatch_webhook(mock_client_cls, webhook):
-    mock_client = AsyncMock()
+@patch("oort.webhook.service.httpx.Client", spec=True)
+def test_dispatch_webhook_sync(mock_client_cls, webhook):
+    mock_client = MagicMock()
     mock_response = MagicMock()
     mock_client.request.return_value = mock_response
 
-    # async with mock
-    mock_client_cls.return_value.__aenter__.return_value = mock_client
+    mock_client_cls.return_value.__enter__.return_value = mock_client
 
     payload = WebhookResponse(
         success=True,
@@ -43,7 +43,7 @@ async def test_dispatch_webhook(mock_client_cls, webhook):
         data=[],
     )
 
-    await dispatch_webhook(webhook, payload)
+    dispatch_webhook(webhook, payload)
 
     mock_client.request.assert_called_once_with(
         method="POST",
@@ -60,17 +60,52 @@ async def test_dispatch_webhook(mock_client_cls, webhook):
     )
 
 
-@patch("oort.webhook.service.dispatch_webhook")
+@patch("oort.webhook.service.httpx.AsyncClient", spec=True)
 @pytest.mark.asyncio
-async def test_webhook_dispatch_async(mock_dispatch, webhook):
-    @webhook_dispatch(event_prefix="test")
+async def test_adispatch_webhook(mock_client_cls, webhook):
+    mock_client = AsyncMock()
+    mock_response = MagicMock()
+    mock_client.request.return_value = mock_response
+
+    # async with mock
+    mock_client_cls.return_value.__aenter__.return_value = mock_client
+
+    payload = WebhookResponse(
+        success=True,
+        type="started",
+        id="123",
+        webhookId="456",
+        data=[],
+    )
+
+    await adispatch_webhook(webhook, payload)
+
+    mock_client.request.assert_called_once_with(
+        method="POST",
+        url="https://example.com/webhook",
+        json={
+            "success": True,
+            "type": "started",
+            "id": "123",
+            "webhookId": "456",
+            "data": [],
+        },
+        headers={},
+        timeout=10.0,
+    )
+
+
+@patch("oort.webhook.service.adispatch_webhook")
+@pytest.mark.asyncio
+async def test_awebhook_dispatch_async_decorator(mock_dispatch, webhook):
+    @awebhook_dispatch(event_prefix="test")
     async def dummy_async_func(data: str, webhook: WebhookRequest = None):
         return MockResponseModel(success=True, output={"result": data})
 
     res = await dummy_async_func("test", webhook=webhook)
     assert res.success is True
 
-    # Check that dispatch_webhook was called for STARTED and COMPLETED
+    # Check that adispatch_webhook was called for STARTED and COMPLETED
     assert mock_dispatch.call_count == 2
 
     call1 = mock_dispatch.call_args_list[0]
@@ -80,8 +115,8 @@ async def test_webhook_dispatch_async(mock_dispatch, webhook):
     assert call2.kwargs["payload"].type == "test.completed"
 
 
-@patch("oort.webhook.service._sync_dispatch")
-def test_webhook_dispatch_sync(mock_dispatch, webhook):
+@patch("oort.webhook.service.dispatch_webhook")
+def test_webhook_dispatch_sync_decorator(mock_dispatch, webhook):
     @webhook_dispatch(event_prefix="test")
     def dummy_sync_func(data: str, webhook: WebhookRequest = None):
         return MockResponseModel(success=True, output={"result": data})
@@ -146,7 +181,7 @@ class AsyncDummyFile:
         self._presigned_url = presigned_url
         self.delay = delay
 
-    async def get_presigned_url_async(self):
+    async def aget_presigned_url(self):
         if self.delay > 0:
             await asyncio.sleep(self.delay)
         if isinstance(self._presigned_url, Exception):
@@ -155,9 +190,9 @@ class AsyncDummyFile:
 
 
 @pytest.mark.asyncio
-async def test_serialize_files_async_single():
+async def test_aserialize_files_single():
     f = AsyncDummyFile()
-    res = await _serialize_files_async(f)
+    res = await _aserialize_files(f)
     assert res == {
         "filename": "test.png",
         "mimetype": "image/png",
@@ -166,9 +201,9 @@ async def test_serialize_files_async_single():
 
 
 @pytest.mark.asyncio
-async def test_serialize_files_async_list():
+async def test_aserialize_files_list():
     f = AsyncDummyFile()
-    res = await _serialize_files_async([f, f])
+    res = await _aserialize_files([f, f])
     expected = {
         "filename": "test.png",
         "mimetype": "image/png",
@@ -178,9 +213,9 @@ async def test_serialize_files_async_list():
 
 
 @pytest.mark.asyncio
-async def test_serialize_files_async_dict():
+async def test_aserialize_files_dict():
     f = AsyncDummyFile()
-    res = await _serialize_files_async({"file": f, "other": "value"})
+    res = await _aserialize_files({"file": f, "other": "value"})
     assert res == {
         "file": {
             "filename": "test.png",
@@ -192,7 +227,7 @@ async def test_serialize_files_async_dict():
 
 
 @pytest.mark.asyncio
-async def test_serialize_files_async_mixed_and_nested():
+async def test_aserialize_files_mixed_and_nested():
     f = AsyncDummyFile()
     complex_data = {
         "list_of_files": [f, {"nested": f}],
@@ -201,7 +236,7 @@ async def test_serialize_files_async_mixed_and_nested():
         "empty_list": [],
         "empty_dict": {},
     }
-    res = await _serialize_files_async(complex_data)
+    res = await _aserialize_files(complex_data)
 
     expected_f = {
         "filename": "test.png",
@@ -218,30 +253,30 @@ async def test_serialize_files_async_mixed_and_nested():
 
 
 @pytest.mark.asyncio
-async def test_serialize_files_async_missing_attributes():
+async def test_aserialize_files_missing_attributes():
     class IncompleteFile:
-        async def get_presigned_url_async(self):
+        async def aget_presigned_url(self):
             return "https://example.com"
 
     f = IncompleteFile()
-    res = await _serialize_files_async(f)
+    res = await _aserialize_files(f)
     assert res is f  # Passes through untouched
 
 
 @pytest.mark.asyncio
-async def test_serialize_files_async_upload_failure():
+async def test_aserialize_files_upload_failure():
     f = AsyncDummyFile(presigned_url=Exception("Mock S3 Error"))
     with pytest.raises(Exception, match="Mock S3 Error"):
-        await _serialize_files_async(f)
+        await _aserialize_files(f)
 
 
 @pytest.mark.asyncio
-async def test_serialize_files_async_concurrency_timing():
+async def test_aserialize_files_concurrency_timing():
     delay = 0.1
     files = [AsyncDummyFile(delay=delay) for _ in range(5)]
 
     start_time = time.monotonic()
-    await _serialize_files_async(files)
+    await _aserialize_files(files)
     duration = time.monotonic() - start_time
 
     # If sequential, it would take 0.5s. If concurrent, it should take ~0.1s.
