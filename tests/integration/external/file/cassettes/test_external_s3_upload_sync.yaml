@@ -3,7 +3,7 @@ interactions:
     body: !!python/object/new:_io.BytesIO
       state: !!python/tuple
       - !!binary |
-        aGVsbG8gZnJvbSBleHRlcm5hbCBzeW5jIHRlc3Q=
+        PFNDUlVCQkVEX0xBUkdFX0JPRFlfSU8+
       - 0
       - null
     headers:
@@ -12,9 +12,6 @@ interactions:
       Content-Type:
       - !!binary |
         dGV4dC9wbGFpbg==
-      Date:
-      - !!binary |
-        VGh1LCAxNiBKdWwgMjAyNiAxMzo1OTo1MCBHTVQ=
       Expect:
       - !!binary |
         MTAwLWNvbnRpbnVl
@@ -22,19 +19,20 @@ interactions:
       - !!binary |
         Qm90bzMvMS40My40NiBtZC9Cb3RvY29yZSMxLjQzLjQ2IHVhLzIuMSBvcy9saW51eCM2LjE3LjAt
         MTAyMC1nY3AgbWQvYXJjaCN4ODZfNjQgbGFuZy9weXRob24jMy4xNC4zIG1kL3B5aW1wbCNDUHl0
-        aG9uIG0vRCxiLFUsTixaLGUgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuNDY=
+        aG9uIG0vYyxlLE4sYSxEIGNmZy9yZXRyeS1tb2RlI2xlZ2FjeSBCb3RvY29yZS8xLjQzLjQ2
+      X-Amz-Content-SHA256:
+      - !!binary |
+        OTdhODM0NDgyM2Y5ZDBmNmQwNzQ3NWNjNjg3MTJkYjUwMDk0YWNhZDRiYWU1ZTE4Y2UwMzMwOGE5
+        MzY1NDg5NQ==
+      X-Amz-Date:
+      - !!binary |
+        MjAyNjA3MTZUMjI1ODE4Wg==
       amz-sdk-invocation-id:
       - !!binary |
-        OWUyN2IzYTAtNWEwYy00ZjAyLWE0ZDMtYzg4OTgzMTFlYmQ4
+        MjA4ZmE2NDUtNzRiYi00MTJlLThmMDUtMjcyMzdmOGE2YTY4
       amz-sdk-request:
       - !!binary |
         YXR0ZW1wdD0x
-      x-amz-checksum-crc32:
-      - !!binary |
-        elptTzlBPT0=
-      x-amz-sdk-checksum-algorithm:
-      - !!binary |
-        Q1JDMzI=
     method: PUT
     uri: https://storage.googleapis.com/koda-asia-south1-bucket-iazx11/integration-sync-test-fixture.txt
   response:
@@ -46,7 +44,7 @@ interactions:
       Content-Type:
       - text/html; charset=UTF-8
       Date:
-      - Thu, 16 Jul 2026 13:59:50 GMT
+      - Thu, 16 Jul 2026 22:58:18 GMT
       ETag:
       - '"1b07083906aa2b206866d8b98d914211"'
       Server:
@@ -54,11 +52,11 @@ interactions:
       Vary:
       - Origin
       X-GUploader-UploadID:
-      - AKhXX7Je5uRgEYjs5n2-6f7vZBKNBnt3UxMUC_uVKnLO_S-_vBqhD-0B32sJ8viS_Rs2ZmJ27l5bQ5o
+      - AKhXX7IlX4RH9YvWAKHCDazV8NTdLAOF9ehMDCI19tp9tK0VnYXEi_qz9Au6SncGRUf4SBnh
       x-amz-checksum-crc32c:
       - Rj4pJQ==
       x-goog-generation:
-      - '1784210390863273'
+      - '1784242698412461'
       x-goog-hash:
       - crc32c=Rj4pJQ==
       - md5=GwcIOQaqKyBoZti5jZFCEQ==
@@ -83,7 +81,7 @@ interactions:
       User-Agent:
       - python-requests/2.34.2
     method: GET
-    uri: https://storage.googleapis.com/koda-asia-south1-bucket-iazx11/integration-sync-test-fixture.txt?AWSAccessKeyId=REDACTED&Expires=1784213990&Signature=REDACTED
+    uri: https://storage.googleapis.com/koda-asia-south1-bucket-iazx11/integration-sync-test-fixture.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-SignedHeaders=host
   response:
     body:
       string: hello from external sync test
@@ -97,21 +95,21 @@ interactions:
       Content-Type:
       - text/plain
       Date:
-      - Thu, 16 Jul 2026 13:59:51 GMT
+      - Thu, 16 Jul 2026 22:58:18 GMT
       ETag:
       - '"1b07083906aa2b206866d8b98d914211"'
       Expires:
-      - Thu, 16 Jul 2026 13:59:51 GMT
+      - Thu, 16 Jul 2026 22:58:18 GMT
       Last-Modified:
-      - Thu, 16 Jul 2026 13:59:50 GMT
+      - Thu, 16 Jul 2026 22:58:18 GMT
       Server:
       - UploadServer
       X-GUploader-UploadID:
-      - AKhXX7LWfZ2otJmGwiwukJrUa22qC5wFn7BXpCSi0g14CjFrwM6FukpuTHEp-0_DFRRD8OJH4XZSB1Y
+      - AKhXX7LEam3dSt93MlXKL0yiII4_tdE-if2dRid23zRJHUenotg1SuZGhGIEeBfzMNTefCws
       x-amz-checksum-crc32c:
       - Rj4pJQ==
       x-goog-generation:
-      - '1784210390863273'
+      - '1784242698412461'
       x-goog-hash:
       - crc32c=Rj4pJQ==
       - md5=GwcIOQaqKyBoZti5jZFCEQ==
