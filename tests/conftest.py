@@ -1,5 +1,7 @@
 import pytest
 from oort.config import settings
+
+
 @pytest.fixture(autouse=True)
 def setup_oort_config():
     settings.s3_bucket = "test-bucket"
